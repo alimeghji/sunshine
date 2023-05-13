@@ -16,7 +16,7 @@ int main(void)
     const float ballRadius = 50.0f; // Circle radius
     const float circleRadius = 50.0f; // Circle radius
 
-    const char* fileName = "..\assets\background11.jpg";
+    
 
     Vector2 recPosition = { 200, 500 }; // Rectangle position
     Vector2 recSize = { 150, 200 }; // Rectangle size
@@ -48,7 +48,7 @@ int main(void)
             circleColor = YELLOW;
         }
 
-        Image LoadImage(const char* fileName); // Loads an image to the screen
+        
 
         if (IsKeyDown(KEY_D)) recPosition.x += 7.5f;  
         if (IsKeyDown(KEY_A)) recPosition.x -= 7.5f;  // Keybaord input for rectangle
