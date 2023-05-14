@@ -22,14 +22,14 @@ int main(void)
     Vector2 lineStartPos = { 19,60 }; // Line start position
     Vector2 lineEndPos = { 1079, 60 }; // Line end position
 
-    Texture2D background = LoadTexture("../game/assets/textures/background1.png");
+    Texture2D background = LoadTexture("../game/assets/textures/background1.png"); // Loads background
 
     while (!WindowShouldClose())
     {
         BeginDrawing();
         ClearBackground(RAYWHITE);
 
-        DrawTexture(background, 0, 0, RAYWHITE);
+        DrawTexture(background, 0, 0, RAYWHITE); // Draws the background
 
         DrawLineEx(lineStartPos, lineEndPos, 10, DARKPURPLE); // Draws a line with thickness
 
