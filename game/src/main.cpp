@@ -34,6 +34,7 @@ int main(void)
         DrawLineEx(lineStartPos, lineEndPos, 10, DARKPURPLE); // Draws a line with thickness
 
         ballPosition = GetMousePosition(); // Used for input from the mouse
+        HideCursor(); // Hides mouse cursor
         
         DrawCircleV(circlePosition, circleRadius, circleColor); // Draws a circle on the screen
 
