@@ -1,6 +1,11 @@
 #include "rlImGui.h"
+#include "Math.h"
+#include <vector>
+#include <raylib.h>
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 720
+
+
 
 int main(void)
 {
