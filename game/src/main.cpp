@@ -16,8 +16,8 @@ class Agent
 {
 public:
     Rigidbody rigidbody;
-    float maxSpeed;
-    float maxAcceleration;
+    float maxSpeed = 1000;
+    float maxAcceleration = 1000;
 };
 
 void UpdateRigidbody(Rigidbody& rigidbody, float deltaTime)
@@ -29,41 +29,38 @@ void UpdateRigidbody(Rigidbody& rigidbody, float deltaTime)
 int main(void)
 {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Sunshine");
-    rlImGuiSetup(true);
     SetTargetFPS(240);
 
     std::vector<Agent> agents;
 
     // Create agents and add them to the container
     Agent agent1;
-    agent1.rigidbody.position = { 0.0f, 0.0f };
-    agent1.rigidbody.velocity = { 1.0f, 1.0f };
+    agent1.rigidbody.position = { SCREEN_WIDTH/2, SCREEN_HEIGHT/2 };
+    agent1.rigidbody.velocity = { 150.0f, -150.0f };
     agents.push_back(agent1);
 
     Agent agent2;
-    agent2.rigidbody.position = { 2.0f, 2.0f };
-    agent2.rigidbody.velocity = { -0.5f, 0.8f };
+    agent2.rigidbody.position = { SCREEN_WIDTH/2, SCREEN_HEIGHT/2 };
+    agent2.rigidbody.velocity = { -150.0f, 150.0f };
     agents.push_back(agent2);
 
-    bool useGUI = false;
     while (!WindowShouldClose())
     {
         const float deltaTime = GetFrameTime();
 
+        // Update all agents
+        for (auto& agent : agents)
+        {
+            UpdateRigidbody(agent.rigidbody, deltaTime);
+        }
+
         BeginDrawing();
         ClearBackground(RAYWHITE);
 
-        if (IsKeyPressed(KEY_GRAVE)) useGUI = !useGUI;
-        if (useGUI)
+        // Draw agents
+        for (const auto& agent : agents)
         {
-           
-        }
-        else
-        {
-            for (auto& agent : agents)
-            {
-                UpdateRigidbody(agent.rigidbody, deltaTime);
-            }
+            DrawCircle(agent.rigidbody.position.x, agent.rigidbody.position.y, 50.0f, BLUE);
         }
 
         EndDrawing();
