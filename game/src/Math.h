@@ -342,6 +342,7 @@ RMAPI Vector2 Normalize(Vector2 v)
     return result;
 }
 
+
 // Transforms a Vector2 by a given Matrix
 RMAPI Vector2 Multiply(Vector2 v, Matrix mat)
 {
