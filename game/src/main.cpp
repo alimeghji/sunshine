@@ -37,7 +37,7 @@ float Vector2Length(const Vector2& vector)
 Vector2 CustomNormalize(const Vector2& vector)
 {
     float length = Vector2Length(vector);
-    if (length != 0)
+    if (length > 0.01)
         return { vector.x / length, vector.y / length };
     else
         return { 0, 0 };
