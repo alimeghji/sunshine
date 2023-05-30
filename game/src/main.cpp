@@ -26,7 +26,7 @@ class Obstacle
 {
 public:
     Vector2 position;
-    Texture2D rock;
+    Texture2D shark;
 };
 
 float Vector2Length(const Vector2& vector)
@@ -94,7 +94,7 @@ int main(void)
     // Create obstacles and add them to the container
     Obstacle obstacle;
     obstacle.position = { SCREEN_WIDTH / 2 - 200, SCREEN_HEIGHT / 2 };
-    obstacle.rock = LoadTexture("../game/assets/textures/shark1.png");
+    obstacle.shark = LoadTexture("../game/assets/textures/shark1.png");
     obstacles.push_back(obstacle);
 
     bool isMouseButtonDown = false;
@@ -148,7 +148,7 @@ int main(void)
         // Draw obstacles
         for (const auto& obstacle : obstacles)
         {
-            DrawTexture(obstacle.rock, obstacle.position.x - obstacle.rock.width / 2, obstacle.position.y - obstacle.rock.height / 2, WHITE);
+            DrawTexture(obstacle.shark, obstacle.position.x - obstacle.shark.width / 2, obstacle.position.y - obstacle.shark.height / 2, WHITE);
         }
 
         EndDrawing();
@@ -164,7 +164,7 @@ int main(void)
 
     for (auto& obstacle : obstacles)
     {
-        UnloadTexture(obstacle.rock);
+        UnloadTexture(obstacle.shark);
     }
 
     CloseWindow();
