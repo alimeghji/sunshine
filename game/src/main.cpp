@@ -5,6 +5,16 @@
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 720
 
+Vector2 MakeCentripetalAcceleration(Vector2 velocity, float acceleration, bool clockwise)
+{
+    float angle;
+    if (clockwise)
+        angle = 90 * RAD2DEG;
+    else
+        angle = -90 * RAD2DEG;
+    return Rotate(Normalize(velocity), angle);
+}
+
 class Agent
 {
 public:
@@ -41,9 +51,26 @@ public:
             circleRotation -= rotationSpeed;
         }
 
-        // Move forward
-        circlePosition.x += cosf(circleRotation * DEG2RAD) * moveSpeed;
-        circlePosition.y += sinf(circleRotation * DEG2RAD) * moveSpeed;
+        // Calculate centripetal acceleration based on angular velocity
+        Vector2 velocity = { cosf(circleRotation * DEG2RAD), sinf(circleRotation * DEG2RAD) };
+        Vector2 centripetalAcceleration = MakeCentripetalAcceleration(velocity, moveSpeed, true);
+
+        // Update the velocity based on centripetal acceleration
+        velocity = Add(velocity, Scale(centripetalAcceleration, GetFrameTime()));
+        velocity = Normalize(velocity);
+
+        // Update the agent's position based on the updated velocity
+        circlePosition = Add(circlePosition, Scale(velocity, moveSpeed));
+    }
+
+    void AlignToVelocity(const Vector2& velocity, float maxRadians)
+    {
+        float targetRotation = atan2f(velocity.y, velocity.x) * RAD2DEG;
+        float deltaRotation = targetRotation - circleRotation;
+        while (deltaRotation > 180.0f) deltaRotation -= 360.0f;
+        while (deltaRotation < -180.0f) deltaRotation += 360.0f;
+        float rotationSpeed = fminf(fabsf(deltaRotation), maxRadians);
+        circleRotation += (deltaRotation < 0.0f ? -rotationSpeed : rotationSpeed);
     }
 };
 
@@ -66,15 +93,9 @@ public:
     bool CheckCollisionWithLine(Vector2 lineStart, Vector2 lineEnd)
     {
         Vector2 nearest = NearestPoint(lineStart, lineEnd, position);
-        return Distance(nearest, position) <= radius;
+        return (Distance(nearest, position) <= radius);
     }
 };
-
-bool CheckCollisionLineCircle(Vector2 lineStart, Vector2 lineEnd, Vector2 circlePosition, float circleRadius)
-{
-    Vector2 nearest = NearestPoint(lineStart, lineEnd, circlePosition);
-    return Distance(nearest, circlePosition) <= circleRadius;
-}
 
 int main(void)
 {
@@ -100,7 +121,7 @@ int main(void)
         obstacle1.Update();
 
         Vector2 direction = Normalize(Subtract(obstacle1.position, agent1.circlePosition));
-        agent1.circleRotation = atan2f(direction.y, direction.x) * RAD2DEG;
+        agent1.AlignToVelocity(direction, 2.0f);
 
         Vector2 directionLeft = Rotate(direction, -45.0f);
         Vector2 directionRight = Rotate(direction, 45.0f);
