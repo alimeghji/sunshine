@@ -18,9 +18,6 @@ class Tilemap
 private:
 	Tile tiles[MAP_WIDTH][MAP_HEIGHT];
 
-	std::vector<std::vector<Tile>> tiles;
-	int width = 0; // number of columns
-	int height = 0; // number of rows in each column
 
 public:
 	int tileSizeX = 100; // width of tiles in pixels when drawing
