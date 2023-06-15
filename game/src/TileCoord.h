@@ -18,6 +18,7 @@ struct TileCoord
 
 	void operator+=(const TileCoord& r) { x += r.x; y += r.y; }
 	void operator-=(const TileCoord& r) { x -= r.x; y -= r.y; }
+
 };
 
 bool operator!=(const TileCoord& l, const TileCoord& r) { return l.x != r.x || l.y != r.y; }

@@ -2,163 +2,55 @@
 #include "math.h"
 #include <vector>
 #include "raylib.h"
+#include "TileMap.h"
 #define SCREEN_WIDTH 1280
 #define SCREEN_HEIGHT 720
 
-Vector2 MakeCentripetalAcceleration(Vector2 velocity, float acceleration, bool clockwise)
-{
-    float angle;
-    if (clockwise)
-        angle = 90 * RAD2DEG;
-    else
-        angle = -90 * RAD2DEG;
-    return Rotate(Normalize(velocity), angle);
-}
-
-class Agent
-{
-public:
-    Vector2 circlePosition;
-    float circleRadius;
-    float circleRotation;
-    Vector2 lineStartLeft;
-    Vector2 lineStartRight;
-    Vector2 lineStartFrontLeft;
-    Vector2 lineStartFrontRight;
-    Vector2 lineEndLeft;
-    Vector2 lineEndRight;
-    Vector2 lineEndFrontLeft;
-    Vector2 lineEndFrontRight;
-
-    Agent()
-    {
-        circleRotation = 0.0f;
-    }
-
-    void AvoidObstacle(const Vector2& obstaclePosition, bool collisionLeft, bool collisionRight, bool collisionFrontLeft, bool collisionFrontRight)
-    {
-        float rotationSpeed = 2.0f;
-        float moveSpeed = 2.0f;
-
-        if (collisionLeft || collisionFrontLeft)
-        {
-            // Turn right
-            circleRotation += rotationSpeed;
-        }
-        else if (collisionRight || collisionFrontRight)
-        {
-            // Turn left
-            circleRotation -= rotationSpeed;
-        }
-
-        // Calculate centripetal acceleration based on angular velocity
-        Vector2 velocity = { cosf(circleRotation * DEG2RAD), sinf(circleRotation * DEG2RAD) };
-        Vector2 centripetalAcceleration = MakeCentripetalAcceleration(velocity, moveSpeed, true);
-
-        // Update the velocity based on centripetal acceleration
-        velocity = Add(velocity, Scale(centripetalAcceleration, GetFrameTime()));
-        velocity = Normalize(velocity);
-
-        // Update the agent's position based on the updated velocity
-        circlePosition = Add(circlePosition, Scale(velocity, moveSpeed));
-    }
-
-    void AlignToVelocity(const Vector2& velocity, float maxRadians)
-    {
-        float targetRotation = atan2f(velocity.y, velocity.x) * RAD2DEG;
-        float deltaRotation = targetRotation - circleRotation;
-        while (deltaRotation > 180.0f) deltaRotation -= 360.0f;
-        while (deltaRotation < -180.0f) deltaRotation += 360.0f;
-        float rotationSpeed = fminf(fabsf(deltaRotation), maxRadians);
-        circleRotation += (deltaRotation < 0.0f ? -rotationSpeed : rotationSpeed);
-    }
-};
-
-class Obstacle
-{
-public:
-    Vector2 position;
-    float radius;
-
-    void Update()
-    {
-        position = GetMousePosition();
-    }
-
-    bool CheckCollisionWithPoint(Vector2 point)
-    {
-        return (Distance(position, point) <= radius);
-    }
-
-    bool CheckCollisionWithLine(Vector2 lineStart, Vector2 lineEnd)
-    {
-        Vector2 nearest = NearestPoint(lineStart, lineEnd, position);
-        return (Distance(nearest, position) <= radius);
-    }
-};
-
 int main(void)
 {
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Ali's Lab 3");
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Ali's Lab 4");
     SetTargetFPS(120);
 
-    const float obstacleRadius = 40.0f;
+    Tilemap tilemap;
+    tilemap.Regenerate(tilemap);
 
-    Agent agent1;
-    agent1.circlePosition = { SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 };
-    agent1.circleRadius = 40.0f;
+    Vector2 characterPosition = tilemap.TilePosToScreenPos(1, 1); // Starting position of the character
+    Texture2D characterSprite = LoadTexture("../game/assets/textures/character.png");
 
-    Obstacle obstacle1;
-    obstacle1.radius = obstacleRadius;
-
-    bool collisionLeft = false;
-    bool collisionRight = false;
-    bool collisionFrontLeft = false;
-    bool collisionFrontRight = false;
+    float characterSpeed = 0.5f;
 
     while (!WindowShouldClose())
     {
-        obstacle1.Update();
-
-        Vector2 direction = Normalize(Subtract(obstacle1.position, agent1.circlePosition));
-        agent1.AlignToVelocity(direction, 2.0f);
-
-        Vector2 directionLeft = Rotate(direction, -45.0f);
-        Vector2 directionRight = Rotate(direction, 45.0f);
-        Vector2 directionFrontLeft = Rotate(direction, 270.0f);
-        Vector2 directionFrontRight = Rotate(direction, -270.0f);
-
-        agent1.lineStartLeft = agent1.circlePosition;
-        agent1.lineStartRight = agent1.circlePosition;
-        agent1.lineStartFrontLeft = agent1.circlePosition;
-        agent1.lineStartFrontRight = agent1.circlePosition;
-
-        agent1.lineEndLeft = Add(agent1.lineStartLeft, Scale(Normalize(directionLeft), agent1.circleRadius * 2));
-        agent1.lineEndRight = Add(agent1.lineStartRight, Scale(Normalize(directionRight), agent1.circleRadius * 2));
-        agent1.lineEndFrontLeft = Add(agent1.lineStartFrontLeft, Scale(Normalize(directionFrontLeft), agent1.circleRadius * 2));
-        agent1.lineEndFrontRight = Add(agent1.lineStartFrontRight, Scale(Normalize(directionFrontRight), agent1.circleRadius * 2));
-
-        collisionLeft = obstacle1.CheckCollisionWithLine(agent1.lineStartLeft, agent1.lineEndLeft);
-        collisionRight = obstacle1.CheckCollisionWithLine(agent1.lineStartRight, agent1.lineEndRight);
-        collisionFrontLeft = obstacle1.CheckCollisionWithLine(agent1.lineStartFrontLeft, agent1.lineEndFrontLeft);
-        collisionFrontRight = obstacle1.CheckCollisionWithLine(agent1.lineStartFrontRight, agent1.lineEndFrontRight);
-
-        agent1.AvoidObstacle(obstacle1.position, collisionLeft, collisionRight, collisionFrontLeft, collisionFrontRight);
-
         BeginDrawing();
         ClearBackground(RAYWHITE);
 
-        DrawCircleV(obstacle1.position, obstacleRadius, RED);
-        DrawCircleV(agent1.circlePosition, agent1.circleRadius, BLUE);
+        // Check keyboard input and update character position
+        Vector2 oldCharacterPosition = characterPosition;
 
-        DrawLineEx(agent1.lineStartLeft, agent1.lineEndLeft, 2.0f, collisionLeft ? RED : GREEN);
-        DrawLineEx(agent1.lineStartRight, agent1.lineEndRight, 2.0f, collisionRight ? RED : GREEN);
-        DrawLineEx(agent1.lineStartFrontLeft, agent1.lineEndFrontLeft, 2.0f, collisionFrontLeft ? RED : GREEN);
-        DrawLineEx(agent1.lineStartFrontRight, agent1.lineEndFrontRight, 2.0f, collisionFrontRight ? RED : GREEN);
+        if (IsKeyDown(KEY_W) && tilemap.IsTraversible(tilemap.ScreenPosToTilePos({ characterPosition.x, characterPosition.y - tilemap.tileSizeY })))
+            characterPosition.y -= tilemap.tileSizeY * characterSpeed;
+        if (IsKeyDown(KEY_S) && tilemap.IsTraversible(tilemap.ScreenPosToTilePos({ characterPosition.x, characterPosition.y + tilemap.tileSizeY })))
+            characterPosition.y += tilemap.tileSizeY * characterSpeed;
+        if (IsKeyDown(KEY_A) && tilemap.IsTraversible(tilemap.ScreenPosToTilePos({ characterPosition.x - tilemap.tileSizeX, characterPosition.y })))
+            characterPosition.x -= tilemap.tileSizeX * characterSpeed;
+        if (IsKeyDown(KEY_D) && tilemap.IsTraversible(tilemap.ScreenPosToTilePos({ characterPosition.x + tilemap.tileSizeX, characterPosition.y })))
+            characterPosition.x += tilemap.tileSizeX * characterSpeed;
+
+        // Reset character position if it moved onto a non-traversable tile
+        if (!tilemap.IsTraversible(tilemap.ScreenPosToTilePos(characterPosition)))
+            characterPosition = oldCharacterPosition;
+
+        // Draw the tilemap
+        tilemap.DrawTiles();
+        tilemap.DrawBorders();
+
+        // Draw the character sprite
+        DrawTextureV(characterSprite, characterPosition, WHITE);
 
         EndDrawing();
     }
 
+    UnloadTexture(characterSprite);
     CloseWindow();
     return 0;
 }
