@@ -13,8 +13,9 @@ struct TileCoord
 	TileCoord() {}
 	TileCoord(int ax, int ay) : x(ax), y(ay) {}
 	TileCoord(float ax, float ay) : x(ax), y(ay) {}
-	TileCoord(Vector2 position) : x(position.x), y(position.y) {}
-	Vector2 toVec2() const { return Vector2{ (float)x,(float)y }; }
+	TileCoord(Vector2 position) : x(static_cast<int>(position.x)), y(static_cast<int>(position.y)) {}
+
+	operator Vector2() const { return Vector2{ static_cast<float>(x), static_cast<float>(y) }; }
 
 	void operator+=(const TileCoord& r) { x += r.x; y += r.y; }
 	void operator-=(const TileCoord& r) { x -= r.x; y -= r.y; }

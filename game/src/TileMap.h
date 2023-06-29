@@ -69,6 +69,28 @@ public:
 		return { floorf(positionOnScreen.x / tileSizeX), floorf(positionOnScreen.y / tileSizeY) };
 	} // find a tile coordinate given a position on the screen over a tile
 
+	std::vector<TileCoord> Tilemap::GetAllTraversableTiles()
+	{
+		std::vector<TileCoord> traversableTiles;
+		for (int x = 0; x < MAP_WIDTH; x++)
+		{
+			for (int y = 0; y < MAP_HEIGHT; y++)
+			{
+				if (tiles[x][y] == Tile::Floor)
+				{
+					traversableTiles.push_back({ x, y });
+				}
+			}
+		}
+		return traversableTiles;
+	}
+
+
+	int GetCostForTile(TileCoord tilePositon)
+	{
+		return 1;
+	}
+
 	void DrawBorders(Color color = BLACK)
 	{
 		for (int x = 0; x < GetGridWidth(); x++)
@@ -150,7 +172,5 @@ public:
 		return adjacentTilePositions;
 	}
 
-	
+
 };
-
-
